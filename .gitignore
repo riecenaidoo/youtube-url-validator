@@ -3,3 +3,7 @@ venv
 
 # IDE Files
 .idea
+
+# Sample Files
+
+response.txt
