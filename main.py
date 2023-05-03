@@ -9,14 +9,9 @@ response = requests.get("https://www.youtube.com/watch?v=g_FTlm3tdoU")
 
 lines = response.text.split("\n")
 print(f"Receive Response of {len(lines)} lines.")
-with open("response.txt", 'w') as f:
-    for line in lines:
-        f.write("\n\n\n")  # Easier on the Eyes.
 
-        line = line.replace("{", "{\n")
-        line = line.replace("},", "},\n\n")
-        line = line.replace("}", "\n}")
-        f.write(line)
+with open("response.html", 'w') as f:
+    f.write(response.text)
 
 print("DONE.")
 
