@@ -16,13 +16,14 @@ scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
 def main():
     # Disable OAuthlib's HTTPS verification when running locally.
     # *DO NOT* leave this option enabled in production.
+    # Disabling this currently seems to work fine?
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
     api_service_name = "youtube"
     api_version = "v3"
-    "config/client_secret.json"
 
     # Get credentials  client
+    # client_secrets_file = "config/client_secret.json"
     # flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
     #     client_secrets_file, scopes)
     # credentials = flow.run_local_server(port=0)
@@ -40,6 +41,7 @@ def main():
         part="player",
         id="g_FTlm3sdq12tdoU,g_FTlm3tdoU"
     )
+
     response = request.execute()
 
     print(response)
