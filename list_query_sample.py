@@ -20,16 +20,21 @@ def main():
 
     api_service_name = "youtube"
     api_version = "v3"
-    client_secrets_file = "config/client_secret.json"
+    "config/client_secret.json"
 
     # Get credentials  client
-    flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-        client_secrets_file, scopes)
-    credentials = flow.run_local_server(port=0)
-    youtube = googleapiclient.discovery.build(
-        api_service_name, api_version, credentials=credentials)
+    # flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
+    #     client_secrets_file, scopes)
+    # credentials = flow.run_local_server(port=0)
+    # youtube = googleapiclient.discovery.build(
+    #     api_service_name, api_version, credentials=credentials)
 
-    googleapiclient.discovery.build(api_service_name,api_version,)
+    # Use Developer Key
+    with open("config/api_key.txt", "r") as f:
+        key = f.readline()
+
+    youtube = googleapiclient.discovery.build(
+        api_service_name, api_version, developerKey=key)
 
     request = youtube.videos().list(
         part="player",
