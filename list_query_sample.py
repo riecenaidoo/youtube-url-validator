@@ -37,14 +37,25 @@ def main():
     youtube = googleapiclient.discovery.build(
         api_service_name, api_version, developerKey=key)
 
+    links_to_validate = {
+        "g_FTlm3sdq12tdoU",
+        "g_FTlm3tdoU"
+    }
+
     request = youtube.videos().list(
         part="player",
         id="g_FTlm3sdq12tdoU,g_FTlm3tdoU"
     )
 
     response = request.execute()
+    # print(response)
 
-    print(response)
+    valid_links = set()
+    for item in response.get("items"):
+        valid_links.add(item.get("id"))
+
+    invalid_links = set.difference(links_to_validate, valid_links)
+    print(f"These are invalid links : {invalid_links}")
 
 
 if __name__ == "__main__":
