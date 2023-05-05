@@ -2,9 +2,10 @@
 
 A breakdown of what the Command Line Interface for this program should look like.
 
-Guidance for how the program should handle different states.
+For use as guidance on how the program should handle and display different states.
 
 ## Splash
+Splash screens are usually displayed the startup of a program.
 
     ----------------------------
         YouTube URL Validator   
@@ -19,8 +20,9 @@ Guidance for how the program should handle different states.
     >   ...
 
 ## Input
-
-The Program should display the input loop in the following ways.
+The program receives user input via the command line.
+It should communicate different states to the user, as they are inputting links,
+and once they've submitted them for validation.
 
 ### Input Command
 The input was a valid command:
@@ -30,7 +32,11 @@ The input was a valid command:
     >   ...
     
 ### Input URL OK
-The input was a valid YouTube URL:
+The input was a recognisable YouTube URL:
+
+*Note: This doesn't mean it is a valid, watchable URL yet,
+it just means the program can parse the input string to find the video ID.
+In a YouTube link, it is usually appended at the end in a format such as, **"...id="***
 
     >   ...
     [OK]
@@ -38,7 +44,8 @@ The input was a valid YouTube URL:
 
 ### Input BAD
 The Input could not be recognised:
-    i.e. Not a valid command, or not a valid/parsable YouTube link.
+
+*i.e. Not a valid program command, or not a valid/parsable YouTube link (see above).*
 
     >   ...
     [BAD]
@@ -59,33 +66,26 @@ The Input could not be recognised:
 
 
     Valid Commands:
-        - 'quit' || 'q'
-        - 'help'
+        - 'quit' || 'q' : Exit the Program.
+        - 'help'        : Display Help information (i.e this screen)
 
-## Quit Command
-
-### Cancelled Mid-Loop
-During an input request
-
-    Cancelling...
-
-    Have a Lovely Day!
-
-### Exiting
-After finishing a request.
-
-    Thank you for using YouTube-URL-Validator.
-
-    Have a Lovely Day!
 
 ## Submitting
+Once the user has submitted all their links for validation,
+and have entered an empty line (which is treated as the Submission Command),
+the program will send these links for validation and receive a **Response**
+from the YouTube Data API.
+
+Using this response, we can determine which links were valid, 
+watchable videos and display this information to the user.
 
 ### Valid Links
+In the case that all links are valid:
 
     >   ...
     >
     [SUBMIT] --->
-    <--- [RECIEVED]
+    <--- [RECEIVED]
     
     Status:
         20  Links Submitted.
@@ -94,11 +94,12 @@ After finishing a request.
     Links are healthy.
 
 ### Invalid Links
+In the case that some, or all links are valid:
 
     >   ...
     >
     [SUBMIT] --->
-    <--- [RECIEVED]
+    <--- [RECEIVED]
     
     Status:
         20  Links Submitted.
@@ -110,6 +111,7 @@ After finishing a request.
         [2] ...
 
 ### Request Error
+In the case that the program could not reach the API (*most likely due to network failures*):
 
     >   ...
     >
@@ -121,13 +123,34 @@ After finishing a request.
         "..."
 
 ### Response Error
+In the case that the **Response** received was an Error message 
+(*most likely due to an authentication failure*):
 
     >   ...
     >
     [SUBMIT] --->
-    X--- [RECIEVED]
+    X--- [RECEIVED]
 
-    There was a problem receving a Response.
+    There was a problem receiving a Response.
 
     Status:
         "..."
+
+## Quit Command
+The program should have a way to exit gracefully, 
+this is the purpose of the `quit` command.
+For aesthetics, we can have a different quit message displayed depending on how/when the program quit.
+
+### Cancelled Mid-Loop
+If quit before receiving a Response (*see above*):
+
+    Cancelling...
+
+    Have a Lovely Day!
+
+### Exiting
+If quit after receiving a Response (*see above*):
+
+    Thank you for using YouTube-URL-Validator.
+
+    Have a Lovely Day!
