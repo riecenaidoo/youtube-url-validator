@@ -8,6 +8,30 @@ As part of a larger project, there was a need for a way to programmatically vali
 
 ### Pilot Test Code
 
+First just sent a request to two sample links, one we know to be valid, and one we know to be invalid (*by checking manually*). 
+Expectation was that the valid link would return a Response [200] OK, and the invalid Response [400+] ERROR.
+Here, it was discovered that YouTube will return Response [200] for both types of links, invalid and valid. 
+However, the invalid link had a different page and unplayable video. 
+The second solution was to try to send a header in the Requests to disallow redirecting, under the assumption that YouTube is redirecting the URL to a default 'Video Unavailable' webpage.
+However, this was not the case. 
+Finally, we decide to deserialize the Response and look at what is being returned.
+The response is a html page, and within the html page there was a noticeable difference between the two types of responses:
+Both had a player embedded in their page, but in the invalid link, the player was disabled and set to display an error message.
+Using simple requests, we can search for that pattern in the response to see if the video is playable or not i.e. if the webpage for that URL has a playable miniplayer with the playability status set to `OK`.
+
+The advantage of this solution is that it is simplistic.
+
+The disadvantages of this solution are major;
+
+To validate a large amount of URLs, we would need to send a large number of requests and received a large number of responses and search through them. With a decent connection, and computer, this wouldn't take too long, but it is a very poor use of resources.
+The second major disadvantage is that this is a `hack` solution, and not a permanent solution. 
+    - Should the format of these webpages every change slightly, the pattern matching would break and so would this important validation service.
+    - With only two sample videos links used, we can't be sure that every single valid, and invalid link would follow these formats. For instance, are the responses the same for the links of webpages in different languages or regions?
+
+So, while this solution could work, for a limited use case, it is unlikely it could be scaled or maintained.
+
+
+
     import requests
     
     urls = {
