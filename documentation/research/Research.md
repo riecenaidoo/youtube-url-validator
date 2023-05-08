@@ -1,61 +1,87 @@
 # Research 
 
-This document serves to archive the steps taken, and thought processes behind the implementation of this solution. 
+This document serves to archive the steps taken, 
+and thought processes behind the implementation of this solution. 
 
 ## The Problem
 
-As part of a larger project, there was a need for a way to programmatically validate large amounts YouTube URLs and determine if they still were usable links (*i.e. not listed as private, or region locked*)
+As part of a larger project, 
+there was a need for a way to programmatically validate large amounts YouTube URLs and,
+determine if they still were usable links (*i.e. not listed as private, or region locked*)
 
-### Pilot Test Code
+## Solution 1: HTTP Requests
+
+### Iteration 1
 
 First just sent a request to two sample links, one we know to be valid, and one we know to be invalid (*by checking manually*). 
-Expectation was that the valid link would return a Response [200] OK, and the invalid Response [400+] ERROR.
-Here, it was discovered that YouTube will return Response [200] for both types of links, invalid and valid. 
-However, the invalid link had a different page and unplayable video. 
-The second solution was to try to send a header in the Requests to disallow redirecting, under the assumption that YouTube is redirecting the URL to a default 'Video Unavailable' webpage.
-However, this was not the case. 
-Finally, we decide to deserialize the Response and look at what is being returned.
-The response is a html page, and within the html page there was a noticeable difference between the two types of responses:
-Both had a player embedded in their page, but in the invalid link, the player was disabled and set to display an error message.
-Using simple requests, we can search for that pattern in the response to see if the video is playable or not i.e. if the webpage for that URL has a playable miniplayer with the playability status set to `OK`.
+The expectation was that the valid link would return a Response [200] OK, and the invalid Response [400+] ERROR.
 
-The advantage of this solution is that it is simplistic.
-
-The disadvantages of this solution are major;
-
-To validate a large amount of URLs, we would need to send a large number of requests and received a large number of responses and search through them. With a decent connection, and computer, this wouldn't take too long, but it is a very poor use of resources.
-The second major disadvantage is that this is a `hack` solution, and not a permanent solution. 
-    - Should the format of these webpages every change slightly, the pattern matching would break and so would this important validation service.
-    - With only two sample videos links used, we can't be sure that every single valid, and invalid link would follow these formats. For instance, are the responses the same for the links of webpages in different languages or regions?
-
-So, while this solution could work, for a limited use case, it is unlikely it could be scaled or maintained.
-
-
+Code:
 
     import requests
     
-    urls = {
-        (True, 200, "https://www.youtube.com/watch?v=g_FTlm3tdoU"),
-        (False, 200, "https://www.youtube.com/watch?v=g_FTlm3sdq12tdoU"),
-    }
+    valid_link_response = requests.get("https://www.youtube.com/watch?v=g_FTlm3tdoU")
+    invalid_link_response = requests.get("https://www.youtube.com/watch?v=g_FTlm3sdq12tdoU")
     
-    response = requests.get("https://www.youtube.com/watch?v=g_FTlm3tdoU")
+    print(f"Valid Link Response Code: {valid_link_response.status_code}")
+    print(f"Invalid Link Response Code: {invalid_link_response.status_code}")
+
+Output:
+
+    Valid Link Response Code: 200
+    Invalid Link Response Code: 200
     
-    lines = response.text.split("\n")
-    print(f"Receive Response of {len(lines)} lines.")
+    Process finished with exit code 0
+
+*Here, it was discovered that YouTube will return Response [200] for both types of links, invalid and valid.*
+
+### Iteration 2
+
+However, the invalid link had a different page and unplayable video. 
+
+The second solution was to try to send a header in the Requests to disallow redirecting, under the assumption that YouTube is redirecting the URL to a default 'Video Unavailable' webpage.
+
+Code:
+
+    import requests
     
-    with open("sample/response.txt", 'w') as f:
-        f.write(response.text)
+    valid_link_response = requests.get("https://www.youtube.com/watch?v=g_FTlm3tdoU", allow_redirects=False)
+    invalid_link_response = requests.get("https://www.youtube.com/watch?v=g_FTlm3sdq12tdoU", allow_redirects=False)
     
-    print("DONE.")
+    print(f"Valid Link Response Code: {valid_link_response.status_code}")
+    print(f"Invalid Link Response Code: {invalid_link_response.status_code}")
 
-### HTTP Request
+Output:
 
-When sending the request, both the valid and invalid video links return a Response OK [200].
+    Valid Link Response Code: 200
+    Invalid Link Response Code: 200
+    
+    Process finished with exit code 0
 
-In `response.txt` :
+However, this was not the case. 
 
-Valid Link (Can be Played):
+### Iteration 3
+
+Finally, we decide to deserialize the Response and look at what is being returned.
+
+Code:
+
+    import requests
+    
+    valid_link_response = requests.get("https://www.youtube.com/watch?v=g_FTlm3tdoU", allow_redirects=False)
+    invalid_link_response = requests.get("https://www.youtube.com/watch?v=g_FTlm3sdq12tdoU", allow_redirects=False)
+    
+    with open("valid_response.txt", "w") as f:
+        f.write(valid_link_response.text)
+    
+    with open("invalid_response.txt", "w") as f:
+        f.write(invalid_link_response.text)
+
+
+The responses are html pages, which we could view in an easier to read format in code editor. 
+Within the html page there was a noticeable difference between the two types of responses:
+
+In `valid_response.txt` :
 
     "playabilityStatus":{
         "status":"OK",
@@ -66,8 +92,7 @@ Valid Link (Can be Played):
                 }
             }
 
-
-Invalid Link (Can't be Played):
+In `invalid_response.txt` :
 
     "playabilityStatus":{
         "status":"ERROR",
@@ -79,7 +104,28 @@ Invalid Link (Can't be Played):
                     }
 
 
-## API
+Both had a player embedded in their page, but in the invalid link, the player was disabled and set to display an error message.
+
+### Summary
+
+#### Potential Solution
+Using simple requests, we can search for that pattern in the response to see if the video is playable or not i.e. if the webpage for that URL has a playable miniplayer with the playability status set to `OK`.
+
+#### Advantages
+The advantage of this solution is that it is simplistic.
+
+#### Disadvantages
+The disadvantages of this solution are major;
+
+To validate a large amount of URLs, we would need to send a large number of requests and received a large number of responses and search through them. With a decent connection, and computer, this wouldn't take too long, but it is a very poor use of resources.
+The second major disadvantage is that this is a `hack` solution, and not a permanent solution. 
+    - Should the format of these webpages every change slightly, the pattern matching would break and so would this important validation service.
+    - With only two sample videos links used, we can't be sure that every single valid, and invalid link would follow these formats. For instance, are the responses the same for the links of webpages in different languages or regions?
+
+So, while this solution could work, for a limited use case, it is unlikely it could be scaled or maintained.
+
+
+## Solution 2: YouTube Data API
 
 Guides:
 https://developers.google.com/youtube/v3/docs/videos/list
@@ -155,3 +201,6 @@ Response [200] :
       }
     }
 
+### Summary
+
+The YouTube Data API provides a way to check large amounts of links, and will not be protected from being outdated*
