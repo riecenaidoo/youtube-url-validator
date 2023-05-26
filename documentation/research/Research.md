@@ -6,15 +6,18 @@ and thought processes behind the implementation of this solution.
 ## The Problem
 
 As part of a larger project, 
-there was a need for a way to programmatically validate large amounts YouTube URLs and,
+there was a need for a way to programmatically validate large amounts of YouTube URLs and,
 determine if they still were usable links (*i.e. not listed as private, or region locked*)
 
 ## Solution 1: HTTP Requests
 
+The first attempted solution was based on HTTP Requests.
+The thought process was that an invalid like would return an error response (400+).
+
 ### Iteration 1
 
-First just sent a request to two sample links, one we know to be valid, and one we know to be invalid (*by checking manually*). 
-The expectation was that the valid link would return a Response [200] OK, and the invalid Response [400+] ERROR.
+First, we send a request to fetch two sample links, one we know to be valid, and one we know to be invalid (*by checking manually*). 
+The expectation was that the valid link would return a Response `200+` (OK), and the invalid Response `400+` (ERROR).
 
 Code:
 
@@ -33,13 +36,16 @@ Output:
     
     Process finished with exit code 0
 
-*Here, it was discovered that YouTube will return Response [200] for both types of links, invalid and valid.*
+*Here, it was discovered that YouTube will return Response `200` (OK) for both invalid and valid links.*
 
 ### Iteration 2
 
-However, the invalid link had a different page and unplayable video. 
+However, there was a noticeable difference between the two links, when viewed manually. 
+The invalid link had a slightly different page layout, with an unplayable embedded video player,
+with the static message, 'Video Unavailable' displayed.
 
-The second solution was to try to send a header in the Requests to disallow redirecting, under the assumption that YouTube is redirecting the URL to a default 'Video Unavailable' webpage.
+The second solution was to try to send a header in the Requests to disallow redirecting, 
+under the assumption that YouTube is redirecting the invalid URL to a default 'Video Unavailable' webpage.
 
 Code:
 
@@ -58,7 +64,7 @@ Output:
     
     Process finished with exit code 0
 
-However, this was not the case. 
+*However, this was not the case, the URL was not being redirected, but the invalid video link was handled internally on the server end.* 
 
 ### Iteration 3
 
@@ -78,10 +84,10 @@ Code:
         f.write(invalid_link_response.text)
 
 
-The responses are html pages, which we could view in an easier to read format in code editor. 
+The responses are HTML pages, which we could view in an easier-to-read format in a code editor. 
 Within the html page there was a noticeable difference between the two types of responses:
 
-In `valid_response.txt` :
+In `valid_response.html` :
 
     "playabilityStatus":{
         "status":"OK",
@@ -92,7 +98,7 @@ In `valid_response.txt` :
                 }
             }
 
-In `invalid_response.txt` :
+In `invalid_response.html` :
 
     "playabilityStatus":{
         "status":"ERROR",
@@ -109,7 +115,8 @@ Both had a player embedded in their page, but in the invalid link, the player wa
 ### Summary
 
 #### Potential Solution
-Using simple requests, we can search for that pattern in the response to see if the video is playable or not i.e. if the webpage for that URL has a playable miniplayer with the playability status set to `OK`.
+Using simple HTTP requests, we can search the HTML page response for the aforementioned pattern to see if the video is playable or not 
+i.e. if the webpage for that URL has a playable mini-player with the playability status set to `OK`.
 
 #### Advantages
 The advantage of this solution is that it is simplistic.
@@ -117,13 +124,15 @@ The advantage of this solution is that it is simplistic.
 #### Disadvantages
 The disadvantages of this solution are major;
 
-To validate a large amount of URLs, we would need to send a large number of requests and received a large number of responses and search through them. With a decent connection, and computer, this wouldn't take too long, but it is a very poor use of resources.
-The second major disadvantage is that this is a `hack` solution, and not a permanent solution. 
-    - Should the format of these webpages every change slightly, the pattern matching would break and so would this important validation service.
-    - With only two sample videos links used, we can't be sure that every single valid, and invalid link would follow these formats. For instance, are the responses the same for the links of webpages in different languages or regions?
+1. To validate a large number of URLs, we would need to send and receive HTTP requests/responses and search through each of them individually. 
+With a decent connection, and computer, this wouldn't take too long, but it is a very poor use of resources.
+2. The second major disadvantage is that this is a **hack** solution and not a permanent solution. 
+    - Should the format of these webpages ever change slightly, the pattern matching would break, which would break this validation script.
+    - With only two sample video links used, we can't be sure that every single valid, and invalid link,
+   would follow these formats. For instance, are the responses the same for the links to web pages in different languages or regions?
 
-So, while this solution could work, for a limited use case, it is unlikely it could be scaled or maintained.
-
+#### Conclusion
+While this solution could work, for a limited use case, it is unlikely it could be scaled or maintained. Another solution is needed.
 
 ## Solution 2: YouTube Data API
 
