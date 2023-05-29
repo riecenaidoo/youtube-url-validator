@@ -36,4 +36,3 @@ def final_validation(ids_to_validate):
     invalid_ids = set.difference(ids_to_validate, valid_ids)
     print(f"These are invalid ids : {invalid_ids}")
 
-
