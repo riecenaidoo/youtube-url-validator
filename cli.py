@@ -5,7 +5,7 @@ ids_to_check = set()
 
 
 def validate_then_add_to_list(text):
-    pattern = re.compile("https://www.youtube.com/watch\?v=([0-9A-Za-z]{11})* || https://www.youtu.be/watch\?v=([0-9A-Za-z]{11})* ")
+    pattern = re.compile("(v=[_0-9A-Za-z]{11})")
     m = re.search(pattern, text)
     if m:
         ids_to_check.add(m.group(1)[2:])
@@ -14,12 +14,12 @@ def validate_then_add_to_list(text):
 
 def run():
     while True:
-        url = input("Enter your url: ").lower()
+        url = input("Enter your url: ")
         global ids_to_check
-        if url == 'validate':
+        if url.lower() == 'validate':
             final_validation(ids_to_check)
             ids_to_check = set()
-        elif url == 'quit':
+        elif url.lower() == 'quit':
             print('Goodbye! ')
             break
         else:
