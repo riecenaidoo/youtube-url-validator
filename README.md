@@ -29,6 +29,10 @@ Install `google-api-python-client`, `google-auth-oauthlib`, and `google-auth-htt
 
     pip install google-api-python-client google-auth-oauthlib google-auth-httplib2
 
+Install Kivy if running the GUI
+
+    pip instal kivy
+
 ### Setup Project Credentials:
 
 *To follow the next steps, and demo this project,
