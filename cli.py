@@ -19,7 +19,7 @@ def run():
         if url.lower() == 'validate':
             final_validation(ids_to_check)
             ids_to_check = set()
-        elif url.lower() == 'quit':
+        elif url.lower() == 'quit' or url.lower() == 'exit':
             print('Goodbye! ')
             break
         else:
