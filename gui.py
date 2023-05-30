@@ -26,9 +26,13 @@ class MyApp(App):
 
     def build(self):
         layout = FloatLayout()
+        # creates a button to add ids to a list size/position are relative to layout size
         add_button = Button(text="Add", pos_hint={'right': .985, 'top': .5}, size_hint=(.1, .05))
+        # creates a text box for url to pasted into
         url_get = TextInput(text="Youtube url", size_hint=(.8, .05), pos_hint={'right': .85, 'top': .5})
+        # creates a validate button which takes the list of ids and checks if they are valid using final_validation
         validate_button = Button(text="Validate", size_hint=(.4, .05), pos_hint={'right': .7, 'top': .43})
+        # binds the buttons to respective function
         add_button.bind(on_release=lambda x: self.validate_then_add_to_list(url_get.text))
         validate_button.bind(on_release=lambda x: self.run_validation())
         layout.add_widget(url_get)
