@@ -1,11 +1,10 @@
-# Virtual Environment
+# Environment
 venv
+__pycache__
 
 # IDE Files
 .idea
-
-# Sample Files
-sample
+.vscode
 
 # Config Files
 config
