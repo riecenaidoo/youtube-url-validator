@@ -57,7 +57,7 @@ def run():
             print("[COMMAND]")
             command()  # Call corresponding function.
 
-            if user_input.lower() == "quit":
+            if command == "quit":
                 break
 
             continue
