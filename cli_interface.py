@@ -1,3 +1,6 @@
+import re
+
+
 def display_splash_message():
     print("""
 ----------------------------
@@ -48,9 +51,13 @@ def run():
         "quit": display_quit_message
     }
 
+    link_ids = set()
     running = True
     while running:
         user_input = input("> ")
+
+        if user_input is None:
+            continue
 
         command = switch.get(user_input.lower())
         if command is not None:
@@ -61,6 +68,14 @@ def run():
                 break
 
             continue
+
+        pattern = re.compile("(v=[_0-9A-Za-z]{11})")
+        matcher = re.search(pattern, user_input)
+        if matcher is not None:
+            link_ids.add(matcher.group(1)[2:])
+            print("[OK]")
+        else:
+            print("[BAD]")
 
     # httplib2.error.ServerNotFoundError <---- Error to catch for submitting failure
 
