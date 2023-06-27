@@ -54,8 +54,8 @@ def run():
 
         command = switch.get(user_input.lower())
         if command is not None:
-            command()
             print("[COMMAND]")
+            command()  # Call corresponding function.
 
             if user_input.lower() == "quit":
                 break
