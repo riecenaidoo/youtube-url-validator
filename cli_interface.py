@@ -62,6 +62,8 @@ def run():
 
             continue
 
+    # httplib2.error.ServerNotFoundError <---- Error to catch for submitting failure
+
 
 if __name__ == '__main__':
     run()
