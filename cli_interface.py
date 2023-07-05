@@ -1,5 +1,7 @@
 import re
 
+import main
+
 
 def display_splash_message():
     print("""
@@ -43,12 +45,17 @@ Have a Lovely Day!
     """)
 
 
+def submit(link_ids: set):
+    main.final_validation(link_ids)
+
+
 def run():
     display_splash_message()
 
     switch = {
         "help": display_help_message,
-        "quit": display_quit_message
+        "quit": display_quit_message,
+        " ": submit
     }
 
     link_ids = set()
@@ -62,7 +69,12 @@ def run():
         command = switch.get(user_input.lower())
         if command is not None:
             print("[COMMAND]")
-            command()  # Call corresponding function.
+
+            if command == submit:
+                command(link_ids)
+                break
+            else:
+                command()  # Call corresponding function.
 
             if command == "quit":
                 break
